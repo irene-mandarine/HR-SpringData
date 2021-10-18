@@ -1,8 +1,11 @@
 package com.webApp.HRdatabase.repository;
 
+import com.webApp.HRdatabase.data.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class DepartmentRepository {
+public interface DepartmentRepository
+        extends JpaRepository<Department, Long> {
 
 }
