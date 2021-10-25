@@ -1,12 +1,15 @@
 package com.webApp.HRdatabase.service;
 
+import com.webApp.HRdatabase.exceptions.DepartmentNotFoundException;
 import com.webApp.HRdatabase.data.Department;
+import com.webApp.HRdatabase.dto.DepartmentDto;
 import com.webApp.HRdatabase.repository.DepartmentRepository;
 import com.webApp.HRdatabase.validation.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DepartmentService {
@@ -20,26 +23,40 @@ public class DepartmentService {
         this.validationService = validationService;
     }
 
-    public List<Department> getDepartments() {
-        return departmentRepository.findAll();
+    public List<DepartmentDto> getDepartments() {
+        return departmentRepository.findAll()
+                .stream()
+                .map(this::convertDepartmentToDto)
+                .collect(Collectors.toList());
     }
 
-    public Department getDepartment(Long id) {
+    public DepartmentDto getDepartment(Long id) {
         validationService.validateId(id);
         return departmentRepository.findById(id)
+                .map(this::convertDepartmentToDto)
                 .orElseThrow((() ->
-                        new IllegalArgumentException("No such department.")));
+                        new DepartmentNotFoundException("No such department.")));
     }
 
-    public Department addDepartment(Department department) {
+    public DepartmentDto addDepartment(DepartmentDto department) {
         validationService.validateDepartment(department);
-        return departmentRepository.save(department);
+        return convertDepartmentToDto(departmentRepository
+                .save(convertToDepartment(department)));
     }
 
-    public Department editDepartment(Department department, Long id) {
+    public DepartmentDto editDepartment(DepartmentDto department, Long id) {
         getDepartment(id);
         validationService.validateDepartment(department);
-        department.setDepartmentId(id);
-        return departmentRepository.save(department);
+        Department d = convertToDepartment(department);
+        d.setDepartmentId(id);
+        return convertDepartmentToDto(departmentRepository.save(d));
+    }
+
+    private DepartmentDto convertDepartmentToDto(Department department) {
+        return new DepartmentDto(department.getName(), department.getLocation());
+    }
+
+    private Department convertToDepartment(DepartmentDto departmentDto) {
+        return new Department(departmentDto.getName(), departmentDto.getLocation());
     }
 }

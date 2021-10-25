@@ -2,8 +2,11 @@ package com.webApp.HRdatabase.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webApp.HRdatabase.data.Department;
 import com.webApp.HRdatabase.data.Employee;
+import com.webApp.HRdatabase.repository.DepartmentRepository;
 import com.webApp.HRdatabase.repository.EmployeeRepository;
+import com.webApp.HRdatabase.service.DepartmentService;
 import com.webApp.HRdatabase.service.EmployeeService;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -44,6 +47,9 @@ class EmployeeControllerTest {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @Autowired
+    private DepartmentService departmentService;
+
     @LocalServerPort
     private String port;
 
@@ -51,10 +57,10 @@ class EmployeeControllerTest {
     void testNullValuesEmployeeInsertion() throws URISyntaxException {
         Employee employee = new Employee("first",
                 null,
-                "dep",
                 "nata@il.com",
                 "5646",
-                56.0);
+                1,
+                new Department("LPS", "NYC"));
         RequestEntity<Employee> requestEntity = new RequestEntity<>(employee,
                 HttpMethod.POST,
                 new URI("http://localhost:" + port + "/api/hr/employees/"));
@@ -67,10 +73,10 @@ class EmployeeControllerTest {
     void testEmptyNameEmployeeInsertion() throws URISyntaxException {
         Employee employee = new Employee("first",
                 "",
-                "dep",
                 "nata@il.com",
                 "5646",
-                56.0);
+                56.0,
+                new Department("LPS", "NYC"));
         RequestEntity<Employee> requestEntity = new RequestEntity<>(employee,
                 HttpMethod.POST,
                 new URI("http://localhost:" + port + "/api/hr/employees/"));
@@ -83,10 +89,10 @@ class EmployeeControllerTest {
     void testBlankNameEmployeeInsertion() throws URISyntaxException {
         Employee employee = new Employee("first",
                 "        ",
-                "dep",
                 "nata@il.com",
                 "5646",
-                56.0);
+                56.0,
+                new Department("LPS", "NYC"));
         RequestEntity<Employee> requestEntity = new RequestEntity<>(employee,
                 HttpMethod.POST,
                 new URI("http://localhost:" + port + "/api/hr/employees/"));
@@ -99,10 +105,10 @@ class EmployeeControllerTest {
     void testNotValidSalaryEmployeeInsertion() throws URISyntaxException {
         Employee employee = new Employee("first",
                 "last",
-                "dep",
                 "nata@il.com",
                 "5646",
-                -90);
+                -90,
+                new Department("LPS", "NYC"));
         RequestEntity<Employee> requestEntity = new RequestEntity<>(employee,
                 HttpMethod.POST,
                 new URI("http://localhost:" + port + "/api/hr/employees/"));
@@ -116,11 +122,11 @@ class EmployeeControllerTest {
     void testEmployeeInsertion() throws URISyntaxException {
         String firstName = "Lana";
         String lastName = "Ion";
-        String department = "Finance";
+        Department department = new Department("LPS", "NYC");
         String email = "lana.ion@f.com";
         String phoneNumber = "569595";
         double salary = 79.0;
-        Employee employee = new Employee(firstName, lastName, department, email, phoneNumber, salary);
+        Employee employee = new Employee(firstName, lastName, email,phoneNumber,salary,department);
         RequestEntity<Employee> requestEntity = new RequestEntity<>(employee,
                 HttpMethod.POST,
                 new URI("http://localhost:" + port + "/api/hr/employees/"));
@@ -142,17 +148,17 @@ class EmployeeControllerTest {
         Employee d1 = employeeRepository
                 .save(new Employee("first",
                         "last",
-                        "dep",
                         "fl@mail.com",
                         "565656",
-                        56.0));
+                        56.0,
+                        new Department("LPS", "NYC")));
         Employee d2 = employeeRepository
                 .save(new Employee("first1",
                         "last1",
-                        "dep",
                         "fl1@mail.com",
                         "565657",
-                        56.0));
+                        56.0,
+                        new Department("LPS", "NYC")));
         List<Employee> expected = asList(d1, d2);
         ResponseEntity<String> responseEntity = restTemplate
                 .getForEntity(new URI("http://localhost:" + port + "/api/hr/employees/"),
@@ -169,10 +175,10 @@ class EmployeeControllerTest {
         Employee e1 = employeeRepository
                 .save(new Employee("first",
                         "last",
-                        "dep",
                         "fl@mail.com",
                         "565656",
-                        56.0));
+                        56.0,
+                        new Department("LPS", "NYC")));
         System.out.println(employeeRepository.findById(e1.getId()));
         ResponseEntity<Employee> responseEntity = restTemplate
                 .getForEntity(new URI("http://localhost:" + port + "/api/hr/employees/" + e1.getId()),
@@ -187,10 +193,10 @@ class EmployeeControllerTest {
         Employee e1 = employeeRepository
                 .save(new Employee("first",
                         "last",
-                        "dep",
                         "fl@mail.com",
                         "565656",
-                        56.0));
+                        56.0,
+                        new Department("LPS", "NYC")));
         e1.setPhoneNumber("569785");
         RequestEntity<Employee> requestEntity = new RequestEntity<>(e1,
                 HttpMethod.PUT,
@@ -207,16 +213,16 @@ class EmployeeControllerTest {
         Employee e1 = employeeRepository
                 .save(new Employee("first",
                         "last",
-                        "dep",
                         "fl@mail.com",
                         "565656",
-                        56.0));
-        Employee e2 = new Employee("first",
+                        56.0,
+                        new Department("LPS", "NYC")));
+        Employee e2 =new Employee("first",
                 "last",
-                "dep",
                 "fl@mail.com",
                 "565656",
-                56.0);
+                56.0,
+                new Department("LPS", "NYC"));
         RequestEntity<Employee> requestEntity = new RequestEntity<>(e2,
                 HttpMethod.POST,
                 new URI("http://localhost:" + port + "/api/hr/employees/"));
